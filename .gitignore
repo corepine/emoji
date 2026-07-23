@@ -1,0 +1,9 @@
+/vendor
+/node_modules
+/.phpunit.cache
+/.pest
+/workbench/vendor
+/workbench/node_modules
+/workbench/public/build
+/workbench/storage
+/.DS_Store

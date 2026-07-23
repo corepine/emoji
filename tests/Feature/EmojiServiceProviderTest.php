@@ -1,0 +1,49 @@
+<?php
+
+use Corepine\Emoji\EmojiData;
+use Illuminate\Support\Facades\Blade;
+
+it('registers package config and emoji data service', function () {
+    expect(config('corepine-emoji.locale'))->toBe('en')
+        ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class);
+});
+
+it('renders the main emoji component with a wire model', function () {
+    $html = Blade::render('<x-corepine.emoji wire:model="body" />');
+
+    expect($html)
+        ->toContain('data-corepine-emoji')
+        ->toContain('x-anchor.offset.10')
+        ->toContain('scrollbar-thin')
+        ->toContain('wireModel: \'body\'')
+        ->toContain('dusk="emoji-picker"');
+});
+
+it('renders bundled package assets', function () {
+    $html = Blade::render('<x-corepine.emoji.assets />');
+
+    expect($html)
+        ->toContain('data-corepine-emoji-assets')
+        ->toContain('corepine-emoji-panel')
+        ->toContain('scrollbar-thin')
+        ->toContain('grid-cols-8');
+});
+
+it('renders the reaction component', function () {
+    $html = Blade::render('<x-corepine.emoji.reaction />');
+
+    expect($html)
+        ->toContain('data-corepine-emoji-reaction')
+        ->toContain('x-anchor.offset.10')
+        ->toContain('dusk="emoji-reaction-picker"')
+        ->toContain('quick:')
+        ->toContain('More reactions');
+});
+
+it('loads generated emoji categories', function () {
+    $categories = app(EmojiData::class)->categories();
+
+    expect($categories)->not->toBeEmpty()
+        ->and($categories[0])->toHaveKeys(['key', 'label', 'icon', 'emojis'])
+        ->and($categories[0]['emojis'][0])->toHaveKeys(['emoji', 'label', 'tags']);
+});

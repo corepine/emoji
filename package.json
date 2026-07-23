@@ -1,0 +1,15 @@
+{
+  "name": "corepine-emoji-assets",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:data": "node scripts/build-emoji-data.js",
+    "dev": "tailwindcss -i ./resources/css/app.css -o ./dist/corepine-emoji.css --watch",
+    "build": "npm run build:data && tailwindcss -i ./resources/css/app.css -o ./dist/corepine-emoji.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "emojibase-data": "^17.0.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
