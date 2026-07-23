@@ -68,6 +68,6 @@
         class="absolute bottom-full left-0 z-50 mb-3"
         dusk="emoji-reaction-picker"
     >
-        <x-corepine.emoji :target="$target" :trigger="false" :placeholder="$placeholder" recent-label="Recent reactions" />
+        <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :placeholder="$placeholder" recent-label="Recent reactions" />
     </section>
 </div>

@@ -4,6 +4,7 @@
     'placeholder' => 'Search emoji',
     'recentLabel' => 'Recent',
     'dusk' => 'emoji-picker',
+    'embedded' => null,
 ])
 
 @php
@@ -12,6 +13,7 @@
     $wireModel = $attributes->wire('model')->value();
     $recentLimit = (int) config('corepine-emoji.recent_limit', 24);
     $recentStorageKey = (string) config('corepine-emoji.storage.recent', 'corepine.emoji.recent');
+    $isEmbedded = $embedded === null ? ! $trigger : filter_var($embedded, FILTER_VALIDATE_BOOLEAN);
 @endphp
 
 <div
@@ -56,7 +58,7 @@
         @class([
             'corepine-emoji-panel flex h-[31rem] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-950 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:text-white',
             'absolute bottom-full left-0 z-50 mb-3' => $trigger,
-            'h-full w-full shadow-none' => ! $trigger,
+            'h-full w-full shadow-none' => $isEmbedded,
         ])
         role="dialog"
         aria-label="Emoji picker"

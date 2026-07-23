@@ -35,9 +35,19 @@ it('renders the reaction component', function () {
     expect($html)
         ->toContain('data-corepine-emoji-reaction')
         ->toContain('x-anchor.offset.10')
+        ->toContain('h-[31rem]')
+        ->not->toContain('h-full w-full shadow-none')
         ->toContain('dusk="emoji-reaction-picker"')
         ->toContain('quick:')
         ->toContain('More reactions');
+});
+
+it('renders embedded picker panels when triggerless by default', function () {
+    $html = Blade::render('<x-corepine.emoji :trigger="false" />');
+
+    expect($html)
+        ->toContain('h-full w-full shadow-none')
+        ->toContain('dusk="emoji-picker"');
 });
 
 it('loads generated emoji categories', function () {
