@@ -88,11 +88,14 @@
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
         x-on:click.outside="open = false; pickerOpen = false"
-        x-anchor.offset.10="$refs.reactionButton"
-        class="absolute bottom-full left-0 z-50 mb-3 flex flex-col items-start gap-2"
+        x-anchor.fixed.top.offset.10="$refs.reactionButton"
+        class="z-50"
         dusk="emoji-reaction-strip"
     >
-        <div class="corepine-emoji-panel flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+        <div
+            x-ref="reactionStrip"
+            class="corepine-emoji-panel relative flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+        >
             <template x-for="emoji in quick" :key="emoji">
                 <button
                     type="button"
@@ -122,6 +125,8 @@
             x-transition:leave="transition ease-in duration-100"
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+            x-anchor.fixed.top.offset.10="$refs.reactionStrip"
+            class="z-50"
             dusk="emoji-reaction-picker"
         >
             <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :placeholder="$placeholder" recent-label="Recent reactions" />

@@ -117,11 +117,11 @@
         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
         x-on:click.outside="{{ $trigger ? 'open = false' : '' }}"
         @if($trigger)
-            x-anchor.offset.10="$refs.trigger"
+            x-anchor.fixed.offset.10="$refs.trigger"
         @endif
         {{ $panelAttributes->class([
             'corepine-emoji-panel flex h-[31rem] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-950 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:text-white',
-            'absolute bottom-full left-0 z-50 mb-3' => $trigger,
+            'z-50' => $trigger,
             'h-full w-full shadow-none' => $isEmbedded,
             $panelClass,
         ]) }}

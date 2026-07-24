@@ -14,12 +14,13 @@ it('renders the main emoji component', function () {
 
     expect($html)
         ->toContain('data-corepine-emoji')
-        ->toContain('x-anchor.offset.10')
+        ->toContain('x-anchor.fixed.offset.10')
         ->toContain('scrollbar-thin')
         ->toContain('--corepine-emoji-columns: 8')
         ->toContain('target: \'body\'')
         ->toContain('resolveInput()')
-        ->toContain('dusk="emoji-picker"');
+        ->toContain('dusk="emoji-picker"')
+        ->not->toContain('bottom-full');
 });
 
 it('renders the main emoji component without livewire coupling', function () {
@@ -102,7 +103,9 @@ it('renders the reaction component', function () {
 
     expect($html)
         ->toContain('data-corepine-emoji-reaction')
-        ->toContain('x-anchor.offset.10')
+        ->toContain('x-anchor.fixed.top.offset.10')
+        ->toContain('$refs.reactionButton')
+        ->toContain('$refs.reactionStrip')
         ->toContain('h-[31rem]')
         ->not->toContain('h-full w-full shadow-none')
         ->toContain('dusk="emoji-reaction-trigger"')
