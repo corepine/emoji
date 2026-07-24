@@ -1,10 +1,13 @@
 <?php
 
 use Corepine\Emoji\EmojiData;
+use Corepine\Support\Colors\Color;
+use Corepine\Support\Facades\CorepineColor;
 use Illuminate\Support\Facades\Blade;
 
 it('registers package config and emoji data service', function () {
     expect(config('corepine-emoji.locale'))->toBe('en')
+        ->and(config('corepine-emoji.color'))->toBe('emerald')
         ->and(config('corepine-emoji.columns'))->toBe(8)
         ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class);
 });
@@ -16,11 +19,49 @@ it('renders the main emoji component', function () {
         ->toContain('data-corepine-emoji')
         ->toContain('x-anchor.fixed.offset.10')
         ->toContain('scrollbar-thin')
+        ->toContain('--corepine-emoji-accent: '.Color::Emerald[500])
         ->toContain('--corepine-emoji-columns: 8')
         ->toContain('target: \'body\'')
         ->toContain('resolveInput()')
+        ->toContain('clearRecent()')
+        ->toContain('localStorage.removeItem(this.recentStorageKey)')
+        ->toContain('dusk="emoji-clear-recent"')
         ->toContain('dusk="emoji-picker"')
         ->not->toContain('bottom-full');
+});
+
+it('renders configured color variables for picker highlights', function () {
+    config(['corepine-emoji.color' => 'red']);
+
+    $html = Blade::render('<x-corepine.emoji target="message" />');
+
+    expect($html)
+        ->toContain('--corepine-emoji-accent: '.Color::Red[500])
+        ->toContain('--corepine-emoji-accent-hover: '.Color::Red[600])
+        ->toContain('background-color: var(--corepine-emoji-accent);')
+        ->toContain('border-color: var(--corepine-emoji-accent);')
+        ->not->toContain('bg-emerald-500')
+        ->not->toContain('border-emerald-500');
+});
+
+it('allows color to be overridden on a picker instance', function () {
+    config(['corepine-emoji.color' => 'red']);
+
+    $html = Blade::render('<x-corepine.emoji target="message" color="blue" />');
+
+    expect($html)
+        ->toContain('--corepine-emoji-accent: '.Color::Blue[500])
+        ->toContain('--corepine-emoji-accent-hover: '.Color::Blue[600]);
+});
+
+it('resolves registered Corepine support color aliases', function () {
+    CorepineColor::set('brand', Color::Fuchsia);
+
+    $html = Blade::render('<x-corepine.emoji target="message" color="brand" />');
+
+    expect($html)
+        ->toContain('--corepine-emoji-accent: '.Color::Fuchsia[500])
+        ->toContain('--corepine-emoji-accent-hover: '.Color::Fuchsia[600]);
 });
 
 it('renders the main emoji component without livewire coupling', function () {
@@ -51,14 +92,22 @@ it('renders a custom trigger from the component slot', function () {
         ->not->toContain('<span class="text-xl leading-none">☺</span>');
 });
 
-it('renders bundled package assets', function () {
-    $html = Blade::render('<x-corepine.emoji.assets />');
+it('renders bundled package styles', function () {
+    $html = Blade::render('<x-corepine.emoji.styles />');
 
     expect($html)
-        ->toContain('data-corepine-emoji-assets')
+        ->toContain('data-corepine-emoji-styles')
         ->toContain('corepine-emoji-panel')
         ->toContain('scrollbar-thin')
         ->toContain('corepine-emoji-grid');
+});
+
+it('keeps the old assets component alias available', function () {
+    $html = Blade::render('<x-corepine.emoji.assets />');
+
+    expect($html)
+        ->toContain('data-corepine-emoji-styles')
+        ->toContain('corepine-emoji-panel');
 });
 
 it('renders scroll-linked category navigation', function () {
@@ -103,6 +152,7 @@ it('renders the reaction component', function () {
 
     expect($html)
         ->toContain('data-corepine-emoji-reaction')
+        ->toContain('--corepine-emoji-accent: '.Color::Emerald[500])
         ->toContain('x-anchor.fixed.top.offset.10')
         ->toContain('$refs.reactionButton')
         ->toContain('$refs.reactionStrip')
@@ -111,6 +161,7 @@ it('renders the reaction component', function () {
         ->toContain('dusk="emoji-reaction-trigger"')
         ->toContain('dusk="emoji-reaction-strip"')
         ->toContain('dusk="emoji-reaction-picker"')
+        ->toContain('recentStorageKey: \'corepine.emoji.reactions\'')
         ->toContain('<title>smiley</title>')
         ->toContain('pickerOpen')
         ->toContain('quick:')

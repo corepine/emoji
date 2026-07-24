@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Corepine Emoji</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <x-corepine.emoji.assets />
+    <x-corepine.emoji.styles />
 </head>
 <body>
     <main style="padding: 48px;">

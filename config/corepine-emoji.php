@@ -5,9 +5,11 @@ return [
 
     'theme' => 'system',
 
+    'color' => 'emerald',
+
     'columns' => 8,
 
-    'recent_limit' => 24,
+    'recent_limit' => 8,
 
     'quick_reactions' => ['👍', '❤️', '😂', '😮', '😢', '🙏'],
 

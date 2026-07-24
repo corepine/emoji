@@ -3,9 +3,11 @@
     'trigger' => true,
     'placeholder' => 'Search emoji',
     'recentLabel' => 'Recent',
+    'recentStorageKey' => null,
     'dusk' => 'emoji-picker',
     'embedded' => null,
     'columns' => null,
+    'color' => null,
     'wrapperClass' => null,
 ])
 
@@ -22,9 +24,10 @@
     $emojiData = app(\Corepine\Emoji\EmojiData::class);
     $categories = $emojiData->categories();
     $recentLimit = (int) config('corepine-emoji.recent_limit', 24);
-    $recentStorageKey = (string) config('corepine-emoji.storage.recent', 'corepine.emoji.recent');
+    $resolvedRecentStorageKey = (string) ($recentStorageKey ?? config('corepine-emoji.storage.recent', 'corepine.emoji.recent'));
     $isEmbedded = $embedded === null ? ! $trigger : filter_var($embedded, FILTER_VALIDATE_BOOLEAN);
     $columnCount = max(1, (int) ($columns ?? config('corepine-emoji.columns', 8)));
+    $colorStyle = \Corepine\Emoji\Support\Color::style($color);
     $panelStyle = trim("--corepine-emoji-columns: {$columnCount}; ".(string) $attributes->get('style'));
     $classTokens = preg_split('/\s+/', trim((string) $attributes->get('class'))) ?: [];
     $gridColumnClasses = [];
@@ -55,9 +58,10 @@
         categories: @js($categories),
         target: @js($target),
         recentLimit: @js($recentLimit),
-        recentStorageKey: @js($recentStorageKey),
+        recentStorageKey: @js($resolvedRecentStorageKey),
     })"
     x-on:keydown.escape.stop="open = false"
+    style="{{ $colorStyle }}"
     data-corepine-emoji
 >
     @if($trigger)
@@ -73,7 +77,7 @@
             >
                 <span class="text-xl leading-none">
                     <svg
-                        x-bind:style="open ? { color: 'var(--corepine-emoji-accent, var(--wc-brand-primary, #16a34a))' } : null"
+                        x-bind:style="open ? { color: 'var(--corepine-emoji-accent)' } : null"
                         viewBox="0 0 24 24"
                         height="24"
                         width="24"
@@ -141,7 +145,8 @@
                 >
                     <span class="inline-flex size-7 items-center justify-center" x-html="categoryIconSvg(item.key)"></span>
                     <span
-                        class="absolute inset-x-2 bottom-0 h-1 rounded-full bg-emerald-500"
+                        class="absolute inset-x-2 bottom-0 h-1 rounded-full"
+                        style="background-color: var(--corepine-emoji-accent);"
                         x-show="activeCategory === item.key"
                     ></span>
                 </button>
@@ -149,7 +154,7 @@
         </nav>
 
         <div class="shrink-0 p-4 pb-2">
-            <label class="flex h-11 items-center gap-3 rounded-full border-2 border-emerald-500 bg-white px-4 text-zinc-500 focus-within:border-emerald-600 dark:bg-zinc-900 dark:text-zinc-400">
+            <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-white px-4 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
                 <span class="text-xl">⌕</span>
                 <input
                     type="search"
@@ -168,7 +173,18 @@
         >
             <template x-if="recent.length > 0 && !search">
                 <section class="mb-5" data-corepine-emoji-section="recent">
-                    <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
+                        <button
+                            type="button"
+                            class="inline-flex size-6 items-center justify-center rounded-full text-sm font-semibold leading-none text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 focus:bg-zinc-100 focus:outline-none dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 dark:focus:bg-zinc-800"
+                            x-on:click.stop="clearRecent()"
+                            aria-label="Clear recent emoji"
+                            dusk="emoji-clear-recent"
+                        >
+                            x
+                        </button>
+                    </div>
                     <div class="{{ $emojiGridClass }} gap-1">
                         <template x-for="emoji in recent" :key="`recent-${emoji}`">
                             <button
@@ -400,6 +416,13 @@
                 storeRecent(emoji) {
                     this.recent = [emoji, ...this.recent.filter((item) => item !== emoji)].slice(0, this.recentLimit);
                     localStorage.setItem(this.recentStorageKey, JSON.stringify(this.recent));
+                },
+
+                clearRecent() {
+                    this.recent = [];
+                    localStorage.removeItem(this.recentStorageKey);
+                    this.activeCategory = this.categories[0]?.key ?? null;
+                    this.$nextTick(() => this.syncActiveCategory());
                 },
             }));
         });

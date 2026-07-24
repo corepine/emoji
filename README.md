@@ -13,8 +13,6 @@ composer require corepine/emoji
 ## Usage
 
 ```blade
-<x-corepine.emoji.assets />
-
 <textarea id="message"></textarea>
 
 <x-corepine.emoji target="message" />
@@ -24,6 +22,12 @@ composer require corepine/emoji
 </x-corepine.emoji>
 
 <x-corepine.emoji.reaction />
+```
+
+When you are not compiling the package CSS through your app, render the bundled styles once in your layout:
+
+```blade
+<x-corepine.emoji.styles />
 ```
 
 ## License

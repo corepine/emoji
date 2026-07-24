@@ -18,7 +18,8 @@ class EmojiServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'corepine-emoji');
 
-        Blade::component('corepine-emoji::components.assets', 'corepine.emoji.assets');
+        Blade::component('corepine-emoji::components.styles', 'corepine.emoji.styles');
+        Blade::component('corepine-emoji::components.styles', 'corepine.emoji.assets');
         Blade::component('corepine-emoji::components.picker', 'corepine.emoji');
         Blade::component('corepine-emoji::components.reaction', 'corepine.emoji.reaction');
 
@@ -30,6 +31,10 @@ class EmojiServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/corepine-emoji'),
             ], 'corepine-emoji-views');
+
+            $this->publishes([
+                __DIR__.'/../resources/css/app.css' => resource_path('css/vendor/corepine-emoji.css'),
+            ], 'corepine-emoji-styles');
 
             $this->publishes([
                 __DIR__.'/../resources/css/app.css' => resource_path('css/vendor/corepine-emoji.css'),

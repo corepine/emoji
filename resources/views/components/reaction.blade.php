@@ -2,16 +2,18 @@
     'quick' => null,
     'target' => null,
     'placeholder' => 'Search reaction',
+    'color' => null,
 ])
 
 @php
     $emojiData = app(\Corepine\Emoji\EmojiData::class);
     $quickReactions = is_array($quick) ? $quick : $emojiData->quickReactions();
     $reactionStorageKey = (string) config('corepine-emoji.storage.reactions', 'corepine.emoji.reactions');
+    $reactionStyle = trim(\Corepine\Emoji\Support\Color::style($color).' '.(string) $attributes->get('style'));
 @endphp
 
 <div
-    {{ $attributes->merge(['class' => 'corepine-emoji-reaction relative inline-flex']) }}
+    {{ $attributes->except('style')->merge(['class' => 'corepine-emoji-reaction relative inline-flex']) }}
     x-data="{
         open: false,
         pickerOpen: false,
@@ -44,6 +46,7 @@
     }"
     x-on:corepine-emoji:selected="choose($event.detail.emoji)"
     x-on:keydown.escape.stop="open = false; pickerOpen = false"
+    style="{{ $reactionStyle }}"
     data-corepine-emoji-reaction
 >
     <button
@@ -58,7 +61,7 @@
     >
         <span class="text-xl leading-none">
             <svg
-                x-bind:style="open ? { color: 'var(--corepine-emoji-accent, var(--wc-brand-primary, #16a34a))' } : null"
+                x-bind:style="open ? { color: 'var(--corepine-emoji-accent)' } : null"
                 viewBox="0 0 24 24"
                 height="24"
                 width="24"
@@ -110,6 +113,7 @@
                 class="inline-flex size-9 items-center justify-center rounded-full text-2xl font-semibold text-zinc-800 transition hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-800"
                 x-ref="moreButton"
                 x-on:click="togglePicker()"
+                x-bind:style="pickerOpen ? { color: 'var(--corepine-emoji-accent)' } : null"
                 aria-label="More reactions"
             >
                 +
@@ -129,7 +133,7 @@
             class="z-50"
             dusk="emoji-reaction-picker"
         >
-            <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :placeholder="$placeholder" recent-label="Recent reactions" />
+            <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :placeholder="$placeholder" :recent-storage-key="$reactionStorageKey" :color="$color" recent-label="Recent reactions" />
         </div>
     </section>
 </div>
