@@ -155,7 +155,9 @@
 
         <div class="shrink-0 p-4 pb-2">
             <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-white px-4 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
-                <span class="text-xl">⌕</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
+                </svg>
                 <input
                     type="search"
                     class="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-0 dark:text-white dark:placeholder:text-zinc-500"
@@ -182,7 +184,9 @@
                             aria-label="Clear recent emoji"
                             dusk="emoji-clear-recent"
                         >
-                            x
+                            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
                         </button>
                     </div>
                     <div class="{{ $emojiGridClass }} gap-1">
