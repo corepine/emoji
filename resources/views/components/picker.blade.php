@@ -78,7 +78,7 @@
                         height="24"
                         width="24"
                         preserveAspectRatio="xMidYMid meet"
-                        class="h-7 w-7 text-gray-600 dark:text-gray-300"
+                        class="h-6 w-6 text-gray-600 dark:text-gray-300"
                         version="1.1"
                         x="0px"
                         y="0px"

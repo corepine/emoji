@@ -105,7 +105,11 @@ it('renders the reaction component', function () {
         ->toContain('x-anchor.offset.10')
         ->toContain('h-[31rem]')
         ->not->toContain('h-full w-full shadow-none')
+        ->toContain('dusk="emoji-reaction-trigger"')
+        ->toContain('dusk="emoji-reaction-strip"')
         ->toContain('dusk="emoji-reaction-picker"')
+        ->toContain('<title>smiley</title>')
+        ->toContain('pickerOpen')
         ->toContain('quick:')
         ->toContain('More reactions');
 });
