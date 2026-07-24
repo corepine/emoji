@@ -42,6 +42,20 @@ it('renders custom columns and merges classes on the picker panel', function () 
         ->toContain('corepine-emoji-grid');
 });
 
+it('moves grid column classes from the panel class to the emoji grids', function () {
+    $panelWidth = 'w-[500'.'px]';
+    $baseGrid = 'grid-cols-'.'4';
+    $responsiveGrid = 'sm:grid-cols-'.'9';
+    $html = Blade::render('<x-corepine.emoji :trigger="false" class="'.$panelWidth.' rounded-xl '.$baseGrid.' '.$responsiveGrid.'" />');
+
+    expect($html)
+        ->toContain('corepine-emoji-panel')
+        ->toContain($panelWidth.' rounded-xl')
+        ->toContain('grid '.$baseGrid.' '.$responsiveGrid.' gap-1')
+        ->and(substr_count($html, $baseGrid))->toBe(2)
+        ->and(substr_count($html, $responsiveGrid))->toBe(2);
+});
+
 it('renders the reaction component', function () {
     $html = Blade::render('<x-corepine.emoji.reaction />');
 

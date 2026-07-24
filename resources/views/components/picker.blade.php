@@ -18,6 +18,24 @@
     $isEmbedded = $embedded === null ? ! $trigger : filter_var($embedded, FILTER_VALIDATE_BOOLEAN);
     $columnCount = max(1, (int) ($columns ?? config('corepine-emoji.columns', 8)));
     $panelStyle = trim("--corepine-emoji-columns: {$columnCount}; ".(string) $attributes->get('style'));
+    $classTokens = preg_split('/\s+/', trim((string) $attributes->get('class'))) ?: [];
+    $gridColumnClasses = [];
+    $panelClassTokens = [];
+
+    foreach ($classTokens as $classToken) {
+        if (preg_match('/(?:^|:)grid-cols-(?:\d+|\[[^\]]+\])$/', $classToken) === 1) {
+            $gridColumnClasses[] = $classToken;
+
+            continue;
+        }
+
+        $panelClassTokens[] = $classToken;
+    }
+
+    $panelClass = trim(implode(' ', $panelClassTokens));
+    $emojiGridClass = $gridColumnClasses === []
+        ? 'corepine-emoji-grid'
+        : 'grid '.implode(' ', $gridColumnClasses);
 @endphp
 
 <div
@@ -59,10 +77,11 @@
         @if($trigger)
             x-anchor.offset.10="$refs.trigger"
         @endif
-        {{ $attributes->except(['wire:model', 'style'])->class([
+        {{ $attributes->except(['wire:model', 'style', 'class'])->class([
             'corepine-emoji-panel flex h-[31rem] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-950 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:text-white',
             'absolute bottom-full left-0 z-50 mb-3' => $trigger,
             'h-full w-full shadow-none' => $isEmbedded,
+            $panelClass,
         ]) }}
         style="{{ $panelStyle }}"
         role="dialog"
@@ -104,7 +123,7 @@
             <template x-if="recent.length > 0 && !search">
                 <section class="mb-5">
                     <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
-                    <div class="corepine-emoji-grid gap-1">
+                    <div class="{{ $emojiGridClass }} gap-1">
                         <template x-for="emoji in recent" :key="`recent-${emoji}`">
                             <button
                                 type="button"
@@ -120,7 +139,7 @@
             <template x-for="category in visibleCategories()" :key="category.key">
                 <section class="mb-5" x-show="category.emojis.length">
                     <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400" x-text="category.label"></h3>
-                    <div class="corepine-emoji-grid gap-1">
+                    <div class="{{ $emojiGridClass }} gap-1">
                         <template x-for="item in category.emojis" :key="`${category.key}-${item.emoji}-${item.label}`">
                             <button
                                 type="button"
