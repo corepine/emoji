@@ -1,10 +1,16 @@
 # Corepine Emoji
 
-Corepine Emoji provides Blade and Alpine emoji picker components for Laravel, with optional Livewire support.
+Corepine Emoji is a Blade and Alpine emoji picker for Laravel apps. It ships native Unicode emoji, a message/comment picker, and a reaction picker that works cleanly with Livewire-powered interfaces.
+
+Learn more at [corepine.dev](https://corepine.dev).
+
+## Installation
 
 ```bash
 composer require corepine/emoji
 ```
+
+## Usage
 
 ```blade
 <x-corepine.emoji.assets />
@@ -13,10 +19,6 @@ composer require corepine/emoji
 
 <x-corepine.emoji target="message" />
 
-<textarea wire:model.live="body"></textarea>
-
-<x-corepine.emoji target="body" />
-
 <x-corepine.emoji target="message">
     <button type="button">Emoji</button>
 </x-corepine.emoji>
@@ -24,4 +26,6 @@ composer require corepine/emoji
 <x-corepine.emoji.reaction />
 ```
 
-The package renders native Unicode emoji and ships compact emoji metadata generated from Emojibase.
+## License
+
+Corepine Emoji is open-sourced software licensed under the [MIT license](LICENSE.md).
