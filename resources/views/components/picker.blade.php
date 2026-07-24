@@ -131,18 +131,18 @@
         dusk="{{ $dusk }}"
     >
         <nav class="flex shrink-0 items-center justify-between gap-1 border-b border-zinc-100 px-4 pt-3 dark:border-zinc-800" aria-label="Emoji categories">
-            <template x-for="category in categories" :key="category.key">
+            <template x-for="item in navigationItems()" :key="item.key">
                 <button
                     type="button"
                     class="relative inline-flex h-10 min-w-10 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-                    x-bind:class="{ 'text-zinc-950 dark:text-white': activeCategory === category.key }"
-                    x-on:click="setCategory(category.key)"
-                    x-bind:aria-label="category.label"
+                    x-bind:class="{ 'text-zinc-950 dark:text-white': activeCategory === item.key }"
+                    x-on:click="scrollToSection(item.key)"
+                    x-bind:aria-label="item.label"
                 >
-                    <span class="inline-flex size-7 items-center justify-center" x-html="categoryIconSvg(category.key)"></span>
+                    <span class="inline-flex size-7 items-center justify-center" x-html="categoryIconSvg(item.key)"></span>
                     <span
                         class="absolute inset-x-2 bottom-0 h-1 rounded-full bg-emerald-500"
-                        x-show="activeCategory === category.key"
+                        x-show="activeCategory === item.key"
                     ></span>
                 </button>
             </template>
@@ -161,9 +161,13 @@
             </label>
         </div>
 
-        <div class="corepine-emoji-scroll scrollbar-thin min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+        <div
+            class="corepine-emoji-scroll scrollbar-thin min-h-0 flex-1 overflow-y-auto px-4 pb-4"
+            x-ref="scroll"
+            x-on:scroll.throttle.100ms="syncActiveCategory()"
+        >
             <template x-if="recent.length > 0 && !search">
-                <section class="mb-5">
+                <section class="mb-5" data-corepine-emoji-section="recent">
                     <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
                     <div class="{{ $emojiGridClass }} gap-1">
                         <template x-for="emoji in recent" :key="`recent-${emoji}`">
@@ -179,7 +183,7 @@
             </template>
 
             <template x-for="category in visibleCategories()" :key="category.key">
-                <section class="mb-5" x-show="category.emojis.length">
+                <section class="mb-5" x-show="category.emojis.length" x-bind:data-corepine-emoji-section="category.key">
                     <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400" x-text="category.label"></h3>
                     <div class="{{ $emojiGridClass }} gap-1">
                         <template x-for="item in category.emojis" :key="`${category.key}-${item.emoji}-${item.label}`">
@@ -211,6 +215,7 @@
                 recent: [],
                 activeCategory: null,
                 categoryIcons: {
+                    'recent': '<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><title>recent</title><circle cx="12" cy="12" r="8.25"></circle><path d="M12 7.5V12l3 2"></path></svg>',
                     'smileys-people': '<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><title>smiley</title><circle cx="12" cy="12" r="8.25"></circle><path d="M9 10.25h.01"></path><path d="M15 10.25h.01"></path><path d="M8.75 14.25c.85 1 1.95 1.5 3.25 1.5s2.4-.5 3.25-1.5"></path></svg>',
                     'animals-nature': '<svg viewBox="0 0 24 24" class="h-6.5 w-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 10.5 5 7.5C4.4 6.8 4.8 5.8 5.7 5.7l3.9-.5"/><path d="m16.5 10.5 2.5-3c.6-.7.2-1.7-.7-1.8l-3.9-.5"/><path d="M6.5 13.5c0-3.3 2.4-5.8 5.5-5.8s5.5 2.5 5.5 5.8c0 3-2.3 5.2-5.5 5.2s-5.5-2.2-5.5-5.2Z"/><path d="M9.5 13h.01"/><path d="M14.5 13h.01"/><path d="M11 15.5h2"/></svg>',
                     'food-drink': '<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8"/><path d="M10 3v8"/><path d="M8 3v18"/><path d="M15 3v18"/><path d="M15 3c2.2 1.2 3.5 3.2 3.5 5.8 0 2.2-1.2 3.7-3.5 4.2"/></svg>',
@@ -222,26 +227,68 @@
                 },
 
                 init() {
-                    this.activeCategory = this.categories[0]?.key ?? null;
                     this.recent = this.readRecent();
+                    this.activeCategory = this.recent.length > 0 ? 'recent' : this.categories[0]?.key ?? null;
+                    this.$nextTick(() => this.syncActiveCategory());
                 },
 
                 toggle() {
                     this.open = !this.open;
                 },
 
-                setCategory(key) {
+                scrollToSection(key) {
                     this.activeCategory = key;
                     this.search = '';
+                    this.$nextTick(() => {
+                        const section = this.$root.querySelector(`[data-corepine-emoji-section="${key}"]`);
+
+                        if (!section || !this.$refs.scroll) {
+                            return;
+                        }
+
+                        this.$refs.scroll.scrollTop = section.offsetTop - this.$refs.scroll.offsetTop;
+                        this.syncActiveCategory();
+                    });
                 },
 
                 categoryIconSvg(key) {
                     return this.categoryIcons[key] ?? this.categoryIcons['smileys-people'];
                 },
 
+                navigationItems() {
+                    const items = this.search ? [] : this.categories.map((category) => ({
+                        key: category.key,
+                        label: category.label,
+                    }));
+
+                    if (!this.search && this.recent.length > 0) {
+                        return [{ key: 'recent', label: @js($recentLabel) }, ...items];
+                    }
+
+                    return items;
+                },
+
+                syncActiveCategory() {
+                    if (this.search || !this.$refs.scroll) {
+                        return;
+                    }
+
+                    const containerTop = this.$refs.scroll.getBoundingClientRect().top;
+                    const sections = Array.from(this.$refs.scroll.querySelectorAll('[data-corepine-emoji-section]'));
+                    let active = this.recent.length > 0 ? 'recent' : this.categories[0]?.key ?? null;
+
+                    for (const section of sections) {
+                        if (section.getBoundingClientRect().top <= containerTop + 20) {
+                            active = section.dataset.corepineEmojiSection;
+                        }
+                    }
+
+                    this.activeCategory = active;
+                },
+
                 visibleCategories() {
                     const query = this.search.trim().toLowerCase();
-                    const source = query ? this.categories : this.categories.filter((category) => category.key === this.activeCategory);
+                    const source = this.categories;
 
                     if (!query) {
                         return source;

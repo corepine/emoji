@@ -6,13 +6,14 @@ const outputPath = path.resolve('resources/data/en/emoji.json');
 
 const categoryLabels = new Map([
   [0, ['smileys-people', 'Smileys & People', '☺']],
-  [1, ['animals-nature', 'Animals & Nature', '♧']],
-  [2, ['food-drink', 'Food & Drink', '☕']],
-  [3, ['travel-places', 'Travel & Places', '◉']],
-  [4, ['activities', 'Activities', '⚽']],
-  [5, ['objects', 'Objects', '✦']],
-  [6, ['symbols', 'Symbols', '#']],
-  [7, ['flags', 'Flags', '⚑']],
+  [1, ['smileys-people', 'Smileys & People', '☺']],
+  [3, ['animals-nature', 'Animals & Nature', '♧']],
+  [4, ['food-drink', 'Food & Drink', '☕']],
+  [5, ['travel-places', 'Travel & Places', '◉']],
+  [6, ['activities', 'Activities', '⚽']],
+  [7, ['objects', 'Objects', '✦']],
+  [8, ['symbols', 'Symbols', '#']],
+  [9, ['flags', 'Flags', '⚑']],
 ]);
 
 if (!fs.existsSync(sourcePath)) {

@@ -60,6 +60,18 @@ it('renders bundled package assets', function () {
         ->toContain('corepine-emoji-grid');
 });
 
+it('renders scroll-linked category navigation', function () {
+    $html = Blade::render('<x-corepine.emoji target="message" />');
+
+    expect($html)
+        ->toContain('navigationItems()')
+        ->toContain('scrollToSection(item.key)')
+        ->toContain('syncActiveCategory()')
+        ->toContain('data-corepine-emoji-section="recent"')
+        ->toContain('categoryIcons')
+        ->toContain('flags');
+});
+
 it('renders custom columns and merges classes on the picker panel', function () {
     $html = Blade::render('<x-corepine.emoji :trigger="false" :columns="4" class="emoji-panel-custom-size" wrapper-class="w-full" />');
 
