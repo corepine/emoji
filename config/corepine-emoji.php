@@ -5,6 +5,8 @@ return [
 
     'theme' => 'system',
 
+    'columns' => 8,
+
     'recent_limit' => 24,
 
     'quick_reactions' => ['👍', '❤️', '😂', '😮', '😢', '🙏'],

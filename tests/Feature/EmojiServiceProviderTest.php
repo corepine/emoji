@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Blade;
 
 it('registers package config and emoji data service', function () {
     expect(config('corepine-emoji.locale'))->toBe('en')
+        ->and(config('corepine-emoji.columns'))->toBe(8)
         ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class);
 });
 
@@ -15,6 +16,7 @@ it('renders the main emoji component with a wire model', function () {
         ->toContain('data-corepine-emoji')
         ->toContain('x-anchor.offset.10')
         ->toContain('scrollbar-thin')
+        ->toContain('--corepine-emoji-columns: 8')
         ->toContain('wireModel: \'body\'')
         ->toContain('dusk="emoji-picker"');
 });
@@ -26,7 +28,18 @@ it('renders bundled package assets', function () {
         ->toContain('data-corepine-emoji-assets')
         ->toContain('corepine-emoji-panel')
         ->toContain('scrollbar-thin')
-        ->toContain('grid-cols-8');
+        ->toContain('corepine-emoji-grid');
+});
+
+it('renders custom columns and merges classes on the picker panel', function () {
+    $html = Blade::render('<x-corepine.emoji :trigger="false" :columns="4" class="emoji-panel-custom-size" wrapper-class="w-full" />');
+
+    expect($html)
+        ->toContain('corepine-emoji relative inline-flex w-full')
+        ->toContain('--corepine-emoji-columns: 4')
+        ->toContain('corepine-emoji-panel')
+        ->toContain('emoji-panel-custom-size')
+        ->toContain('corepine-emoji-grid');
 });
 
 it('renders the reaction component', function () {

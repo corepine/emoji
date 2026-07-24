@@ -8,6 +8,11 @@
   }
 }
 
+.corepine-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--corepine-emoji-columns, 8), minmax(0, 1fr));
+}
+
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
