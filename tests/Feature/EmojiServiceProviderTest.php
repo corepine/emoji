@@ -9,16 +9,45 @@ it('registers package config and emoji data service', function () {
         ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class);
 });
 
-it('renders the main emoji component with a wire model', function () {
-    $html = Blade::render('<x-corepine.emoji wire:model="body" />');
+it('renders the main emoji component', function () {
+    $html = Blade::render('<x-corepine.emoji target="body" />');
 
     expect($html)
         ->toContain('data-corepine-emoji')
         ->toContain('x-anchor.offset.10')
         ->toContain('scrollbar-thin')
         ->toContain('--corepine-emoji-columns: 8')
-        ->toContain('wireModel: \'body\'')
+        ->toContain('target: \'body\'')
+        ->toContain('resolveInput()')
         ->toContain('dusk="emoji-picker"');
+});
+
+it('renders the main emoji component without livewire coupling', function () {
+    $html = Blade::render('<x-corepine.emoji target="message" />');
+
+    expect($html)
+        ->toContain('target: \'message\'')
+        ->not->toContain('wireModel')
+        ->not->toContain('$wire.set');
+});
+
+it('renders next to a livewire model field without an input id', function () {
+    $html = Blade::render('<textarea wire:model.live="body"></textarea><x-corepine.emoji target="body" />');
+
+    expect($html)
+        ->toContain('wire:model.live="body"')
+        ->toContain('target: \'body\'')
+        ->not->toContain('$wire.set');
+});
+
+it('renders a custom trigger from the component slot', function () {
+    $html = Blade::render('<x-corepine.emoji target="message"><button type="button" class="custom-trigger">Pick emoji</button></x-corepine.emoji>');
+
+    expect($html)
+        ->toContain('dusk="emoji-trigger-button"')
+        ->toContain('custom-trigger')
+        ->toContain('Pick emoji')
+        ->not->toContain('<span class="text-xl leading-none">☺</span>');
 });
 
 it('renders bundled package assets', function () {
