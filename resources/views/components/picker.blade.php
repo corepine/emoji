@@ -126,7 +126,7 @@
             x-anchor.fixed.offset.10="$refs.trigger"
         @endif
         {{ $panelAttributes->class([
-            'corepine-emoji-panel flex h-[31rem] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-950 shadow-xl dark:border-zinc-700 dark:bg-zinc-900 dark:text-white',
+            'corepine-emoji-panel flex h-[31rem] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-zinc-200 text-zinc-950 shadow-xl dark:border-zinc-700 dark:text-white',
             'z-50' => $trigger,
             'h-full w-full shadow-none' => $isEmbedded,
             $panelClass,
@@ -156,7 +156,7 @@
         </nav>
 
         <div class="shrink-0 p-4 pb-2">
-            <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-white px-4 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
+            <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-transparent px-4 text-zinc-500 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
                 </svg>

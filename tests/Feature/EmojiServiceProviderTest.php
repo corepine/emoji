@@ -186,6 +186,16 @@ it('renders custom columns and merges classes on the picker panel', function () 
         ->toContain('corepine-emoji-grid');
 });
 
+it('allows picker panel background classes to override defaults', function () {
+    $html = Blade::render('<x-corepine.emoji target="message" class="bg-zinc-50 dark:bg-zinc-800 border-none" />');
+
+    expect($html)
+        ->toContain('bg-zinc-50 dark:bg-zinc-800 border-none')
+        ->toContain('class="flex h-11 items-center gap-3 rounded-full border-2 bg-transparent')
+        ->not->toContain('border border-zinc-200 bg-white')
+        ->not->toContain('dark:bg-zinc-900');
+});
+
 it('moves grid column classes from the panel class to the emoji grids', function () {
     $panelWidth = 'w-[500'.'px]';
     $baseGrid = 'grid-cols-'.'4';

@@ -106,7 +106,7 @@
     >
         <div
             x-ref="reactionStrip"
-            class="corepine-emoji-panel relative flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+            class="corepine-emoji-panel relative flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-2 shadow-lg dark:border-zinc-700"
         >
             <template x-for="emoji in quick" :key="emoji">
                 <button
