@@ -65,7 +65,10 @@
         "laravel": {
             "providers": [
                 "Corepine\\Emoji\\EmojiServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Emoji": "Corepine\\Emoji\\Facades\\Emoji"
+            }
         }
     },
     "minimum-stability": "stable",

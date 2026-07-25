@@ -1,6 +1,9 @@
 <?php
 
+use Corepine\Emoji\Emoji;
 use Corepine\Emoji\EmojiData;
+use Corepine\Emoji\Facades\Emoji as EmojiFacade;
+use Corepine\Emoji\Support\EmojiEvents;
 use Corepine\Support\Colors\Color;
 use Corepine\Support\Facades\CorepineColor;
 use Illuminate\Support\Facades\Blade;
@@ -9,7 +12,42 @@ it('registers package config and emoji data service', function () {
     expect(config('corepine-emoji.locale'))->toBe('en')
         ->and(config('corepine-emoji.color'))->toBe('emerald')
         ->and(config('corepine-emoji.columns'))->toBe(8)
-        ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class);
+        ->and(config('corepine-emoji.recent_limit'))->toBe(24)
+        ->and(app(EmojiData::class))->toBeInstanceOf(EmojiData::class)
+        ->and(app(Emoji::class))->toBeInstanceOf(Emoji::class);
+});
+
+it('exposes package defaults through the emoji facade', function () {
+    expect(EmojiFacade::locale())->toBe('en')
+        ->and(EmojiFacade::theme())->toBe('system')
+        ->and(EmojiFacade::color())->toBe('emerald')
+        ->and(EmojiFacade::columns())->toBe(8)
+        ->and(EmojiFacade::recentLimit())->toBe(24)
+        ->and(EmojiFacade::recentStorageKey())->toBe('corepine.emoji.recent')
+        ->and(EmojiFacade::reactionStorageKey())->toBe('corepine.emoji.reactions')
+        ->and(EmojiFacade::selectedEvent())->toBe('emoji.selected')
+        ->and(EmojiFacade::reactionSelectedEvent())->toBe('emoji.reaction-selected')
+        ->and(EmojiFacade::event())->toBeInstanceOf(EmojiEvents::class)
+        ->and(EmojiFacade::event()->all())->toBe([
+            'selected' => 'emoji.selected',
+            'reaction_selected' => 'emoji.reaction-selected',
+        ])
+        ->and(EmojiFacade::quickReactions())->toBe(['👍', '❤️', '😂', '😮', '😢', '🙏'])
+        ->and(EmojiFacade::config('theme'))->toBe('system')
+        ->and(EmojiFacade::categories())->not->toBeEmpty()
+        ->and(EmojiFacade::emojis())->not->toBeEmpty();
+});
+
+it('allows emoji dispatch events to be renamed through config', function () {
+    config()->set('corepine-emoji.events.dispatch.selected', 'acme.emoji.selected');
+    config()->set('corepine-emoji.events.dispatch.reaction_selected', 'acme.emoji.reaction');
+
+    $html = Blade::render('<x-corepine.emoji.reaction />');
+
+    expect(EmojiFacade::selectedEvent())->toBe('acme.emoji.selected')
+        ->and(EmojiFacade::reactionSelectedEvent())->toBe('acme.emoji.reaction')
+        ->and($html)->toContain('selectedEvent: \'acme.emoji.selected\'')
+        ->and($html)->toContain('reactionSelectedEvent: \'acme.emoji.reaction\'');
 });
 
 it('renders the main emoji component', function () {
@@ -22,6 +60,8 @@ it('renders the main emoji component', function () {
         ->toContain('--corepine-emoji-accent: '.Color::Emerald[500])
         ->toContain('--corepine-emoji-columns: 8')
         ->toContain('target: \'body\'')
+        ->toContain('recentLimit: 24')
+        ->toContain('selectedEvent: \'emoji.selected\'')
         ->toContain('resolveInput()')
         ->toContain('clearRecent()')
         ->toContain('localStorage.removeItem(this.recentStorageKey)')
@@ -122,6 +162,19 @@ it('renders scroll-linked category navigation', function () {
         ->toContain('flags');
 });
 
+it('keeps the message picker open after selecting an emoji', function () {
+    $html = Blade::render('<x-corepine.emoji target="message" />');
+    $selectHandler = substr(
+        $html,
+        strpos($html, 'select(item) {'),
+        strpos($html, 'insertEmoji(emoji) {') - strpos($html, 'select(item) {'),
+    );
+
+    expect($selectHandler)
+        ->toContain('this.$dispatch(this.selectedEvent')
+        ->not->toContain('this.open = false');
+});
+
 it('renders custom columns and merges classes on the picker panel', function () {
     $html = Blade::render('<x-corepine.emoji :trigger="false" :columns="4" class="emoji-panel-custom-size" wrapper-class="w-full" />');
 
@@ -163,6 +216,11 @@ it('renders the reaction component', function () {
         ->toContain('dusk="emoji-reaction-picker"')
         ->toContain('recentStorageKey: \'corepine.emoji.reactions\'')
         ->toContain('<title>smiley</title>')
+        ->toContain('selectedEvent: \'emoji.selected\'')
+        ->toContain('reactionSelectedEvent: \'emoji.reaction-selected\'')
+        ->toContain('this.$el.addEventListener(this.selectedEvent')
+        ->toContain('this.$dispatch(this.reactionSelectedEvent')
+        ->toContain('this.open = false;')
         ->toContain('pickerOpen')
         ->toContain('quick:')
         ->toContain('More reactions');

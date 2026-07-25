@@ -21,13 +21,14 @@
         }
     }
 
-    $emojiData = app(\Corepine\Emoji\EmojiData::class);
-    $categories = $emojiData->categories();
-    $recentLimit = (int) config('corepine-emoji.recent_limit', 24);
-    $resolvedRecentStorageKey = (string) ($recentStorageKey ?? config('corepine-emoji.storage.recent', 'corepine.emoji.recent'));
+    $emoji = app(\Corepine\Emoji\Emoji::class);
+    $categories = $emoji->categories();
+    $recentLimit = $emoji->recentLimit();
+    $resolvedRecentStorageKey = (string) ($recentStorageKey ?? $emoji->recentStorageKey());
+    $selectedEvent = $emoji->event()->selected();
     $isEmbedded = $embedded === null ? ! $trigger : filter_var($embedded, FILTER_VALIDATE_BOOLEAN);
-    $columnCount = max(1, (int) ($columns ?? config('corepine-emoji.columns', 8)));
-    $colorStyle = \Corepine\Emoji\Support\Color::style($color);
+    $columnCount = max(1, (int) ($columns ?? $emoji->columns()));
+    $colorStyle = $emoji->colorStyle($color);
     $panelStyle = trim("--corepine-emoji-columns: {$columnCount}; ".(string) $attributes->get('style'));
     $classTokens = preg_split('/\s+/', trim((string) $attributes->get('class'))) ?: [];
     $gridColumnClasses = [];
@@ -59,6 +60,7 @@
         target: @js($target),
         recentLimit: @js($recentLimit),
         recentStorageKey: @js($resolvedRecentStorageKey),
+        selectedEvent: @js($selectedEvent),
     })"
     x-on:keydown.escape.stop="open = false"
     style="{{ $colorStyle }}"
@@ -232,6 +234,7 @@
                 target: options.target ?? null,
                 recentLimit: options.recentLimit ?? 24,
                 recentStorageKey: options.recentStorageKey ?? 'corepine.emoji.recent',
+                selectedEvent: options.selectedEvent ?? 'emoji.selected',
                 recent: [],
                 activeCategory: null,
                 categoryIcons: {
@@ -330,12 +333,11 @@
                 select(item) {
                     this.storeRecent(item.emoji);
                     this.insertEmoji(item.emoji);
-                    this.$dispatch('corepine-emoji:selected', {
+                    this.$dispatch(this.selectedEvent, {
                         emoji: item.emoji,
                         label: item.label,
                         tags: item.tags ?? [],
                     });
-                    this.open = false;
                 },
 
                 insertEmoji(emoji) {

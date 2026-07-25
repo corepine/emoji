@@ -30,6 +30,23 @@ When you are not compiling the package CSS through your app, render the bundled 
 <x-corepine.emoji.styles />
 ```
 
+## Package API
+
+```php
+use Corepine\Emoji\Facades\Emoji;
+
+Emoji::theme();
+Emoji::columns();
+Emoji::quickReactions();
+Emoji::recentStorageKey();
+Emoji::reactionStorageKey();
+Emoji::event()->selected();
+Emoji::event()->reactionSelected();
+Emoji::categories();
+```
+
+Use the facade or type-hint `Corepine\Emoji\Emoji` from another Laravel package when you need the active Emoji config values.
+
 ## License
 
 Corepine Emoji is open-sourced software licensed under the [MIT license](LICENSE.md).

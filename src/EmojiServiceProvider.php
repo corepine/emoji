@@ -12,6 +12,8 @@ class EmojiServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/corepine-emoji.php', 'corepine-emoji');
 
         $this->app->singleton(EmojiData::class, static fn (): EmojiData => new EmojiData);
+        $this->app->singleton(Emoji::class, fn (): Emoji => new Emoji($this->app->make(EmojiData::class)));
+        $this->app->alias(Emoji::class, \Corepine\Emoji\Facades\Emoji::class);
     }
 
     public function boot(): void

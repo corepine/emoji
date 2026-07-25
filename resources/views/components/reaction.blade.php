@@ -6,10 +6,12 @@
 ])
 
 @php
-    $emojiData = app(\Corepine\Emoji\EmojiData::class);
-    $quickReactions = is_array($quick) ? $quick : $emojiData->quickReactions();
-    $reactionStorageKey = (string) config('corepine-emoji.storage.reactions', 'corepine.emoji.reactions');
-    $reactionStyle = trim(\Corepine\Emoji\Support\Color::style($color).' '.(string) $attributes->get('style'));
+    $emoji = app(\Corepine\Emoji\Emoji::class);
+    $quickReactions = is_array($quick) ? $quick : $emoji->quickReactions();
+    $reactionStorageKey = $emoji->reactionStorageKey();
+    $selectedEvent = $emoji->event()->selected();
+    $reactionSelectedEvent = $emoji->event()->reactionSelected();
+    $reactionStyle = trim($emoji->colorStyle($color).' '.(string) $attributes->get('style'));
 @endphp
 
 <div
@@ -19,6 +21,14 @@
         pickerOpen: false,
         quick: @js($quickReactions),
         storageKey: @js($reactionStorageKey),
+        recentLimit: @js($emoji->recentLimit()),
+        selectedEvent: @js($selectedEvent),
+        reactionSelectedEvent: @js($reactionSelectedEvent),
+        init() {
+            this.$el.addEventListener(this.selectedEvent, (event) => {
+                this.choose(event.detail.emoji);
+            });
+        },
         toggle() {
             this.open = !this.open;
 
@@ -32,19 +42,18 @@
         },
         choose(emoji) {
             this.store(emoji);
-            this.$dispatch('corepine-emoji:reaction-selected', { emoji });
+            this.$dispatch(this.reactionSelectedEvent, { emoji });
             this.open = false;
             this.pickerOpen = false;
         },
         store(emoji) {
             try {
                 const current = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
-                const next = [emoji, ...current.filter((item) => item !== emoji)].slice(0, 24);
+                const next = [emoji, ...current.filter((item) => item !== emoji)].slice(0, this.recentLimit);
                 localStorage.setItem(this.storageKey, JSON.stringify(next));
             } catch (error) {}
         },
     }"
-    x-on:corepine-emoji:selected="choose($event.detail.emoji)"
     x-on:keydown.escape.stop="open = false; pickerOpen = false"
     style="{{ $reactionStyle }}"
     data-corepine-emoji-reaction
