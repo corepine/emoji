@@ -7,6 +7,7 @@ use Corepine\Emoji\Support\EmojiEvents;
 use Corepine\Support\Colors\Color;
 use Corepine\Support\Facades\CorepineColor;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 
 it('registers package config and emoji data service', function () {
     expect(config('corepine-emoji.locale'))->toBe('en')
@@ -62,6 +63,14 @@ it('renders the main emoji component', function () {
         ->toContain('target: \'body\'')
         ->toContain('recentLimit: 24')
         ->toContain('selectedEvent: \'emoji.selected\'')
+        ->toContain('deferRender: true')
+        ->toContain('autofocus: false')
+        ->toContain('x-if="rendered"')
+        ->toContain('rendered: !(options.deferRender ?? false)')
+        ->toContain('x-ref="searchInput"')
+        ->toContain('focusSearch()')
+        ->toContain('this.$refs.searchInput?.focus({ preventScroll: true })')
+        ->toContain('if (this.autofocus)')
         ->toContain('resolveInput()')
         ->toContain('clearRecent()')
         ->toContain('localStorage.removeItem(this.recentStorageKey)')
@@ -175,6 +184,16 @@ it('keeps the message picker open after selecting an emoji', function () {
         ->not->toContain('this.open = false');
 });
 
+it('ranks exact search tag matches before partial matches', function () {
+    $html = Blade::render('<x-corepine.emoji target="message" />');
+
+    expect($html)
+        ->toContain('searchScore(item, query)')
+        ->toContain('tags.includes(query)')
+        ->toContain('tag.startsWith(query)')
+        ->toContain('label.includes(query)');
+});
+
 it('renders custom columns and merges classes on the picker panel', function () {
     $html = Blade::render('<x-corepine.emoji :trigger="false" :columns="4" class="emoji-panel-custom-size" wrapper-class="w-full" />');
 
@@ -231,6 +250,7 @@ it('renders the reaction component', function () {
         ->toContain('this.$el.addEventListener(this.selectedEvent')
         ->toContain('this.$dispatch(this.reactionSelectedEvent')
         ->toContain('this.open = false;')
+        ->toContain('autofocus: true')
         ->toContain('pickerOpen')
         ->toContain('quick:')
         ->toContain('More reactions');
@@ -241,13 +261,28 @@ it('renders embedded picker panels when triggerless by default', function () {
 
     expect($html)
         ->toContain('h-full w-full shadow-none')
+        ->toContain('deferRender: false')
         ->toContain('dusk="emoji-picker"');
+});
+
+it('caches decoded emoji data by locale', function () {
+    File::shouldReceive('exists')->once()->andReturnTrue();
+    File::shouldReceive('get')->once()->andReturn('[{"key":"smileys-people","label":"Smileys & People","icon":"☺","emojis":[]}]');
+
+    $data = new EmojiData();
+
+    expect($data->categories('en'))->toHaveCount(1)
+        ->and($data->categories('en'))->toHaveCount(1);
 });
 
 it('loads generated emoji categories', function () {
     $categories = app(EmojiData::class)->categories();
+    $wavingHand = collect($categories)
+        ->flatMap(fn (array $category) => $category['emojis'])
+        ->firstWhere('emoji', '👋');
 
     expect($categories)->not->toBeEmpty()
         ->and($categories[0])->toHaveKeys(['key', 'label', 'icon', 'emojis'])
-        ->and($categories[0]['emojis'][0])->toHaveKeys(['emoji', 'label', 'tags']);
+        ->and($categories[0]['emojis'][0])->toHaveKeys(['emoji', 'label', 'tags'])
+        ->and($wavingHand['tags'])->toContain('wave', 'hi', 'hello');
 });

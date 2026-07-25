@@ -129,20 +129,22 @@
             </button>
         </div>
 
-        <div
-            x-cloak
-            x-show="pickerOpen"
-            x-transition:enter="transition ease-out duration-150"
-            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-            x-transition:leave="transition ease-in duration-100"
-            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-            x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-            x-anchor.fixed.top.offset.10="$refs.reactionStrip"
-            class="z-50"
-            dusk="emoji-reaction-picker"
-        >
-            <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :placeholder="$placeholder" :recent-storage-key="$reactionStorageKey" :color="$color" recent-label="Recent reactions" />
-        </div>
+        <template x-if="pickerOpen">
+            <div
+                x-cloak
+                x-show="pickerOpen"
+                x-transition:enter="transition ease-out duration-150"
+                x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-100"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                x-anchor.fixed.top.offset.10="$refs.reactionStrip"
+                class="z-50"
+                dusk="emoji-reaction-picker"
+            >
+                <x-corepine.emoji :target="$target" :trigger="false" :embedded="false" :autofocus="true" :placeholder="$placeholder" :recent-storage-key="$reactionStorageKey" :color="$color" recent-label="Recent reactions" />
+            </div>
+        </template>
     </section>
 </div>

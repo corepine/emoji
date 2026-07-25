@@ -16,6 +16,17 @@ const categoryLabels = new Map([
   [9, ['flags', 'Flags', '⚑']],
 ]);
 
+const commonAliases = new Map([
+  ['👋', ['wave', 'waving', 'hello', 'hi', 'hey', 'bye']],
+  ['👍', ['ok', 'okay', 'yes', 'like', 'approve', 'thumbs up']],
+  ['🙏', ['please', 'thanks', 'thank you', 'pray', 'prayer']],
+  ['❤️', ['heart', 'love', 'like']],
+  ['😂', ['lol', 'laugh', 'laughing', 'funny']],
+  ['🔥', ['fire', 'hot', 'lit']],
+  ['🎉', ['party', 'celebrate', 'congrats', 'congratulations']],
+  ['💯', ['100', 'perfect', 'score','awesome']],
+]);
+
 if (!fs.existsSync(sourcePath)) {
   throw new Error(`Missing Emojibase data at ${sourcePath}. Run npm install first.`);
 }
@@ -49,9 +60,10 @@ for (const item of data) {
     emoji: item.emoji,
     label: item.label ?? item.annotation ?? item.name ?? item.emoji,
     tags: Array.from(new Set([
+      ...(commonAliases.get(item.emoji) ?? []),
       ...(item.tags ?? []),
       ...(item.shortcodes ?? []),
-    ])).slice(0, 12),
+    ])).slice(0, 16),
   });
 }
 

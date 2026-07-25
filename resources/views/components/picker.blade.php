@@ -9,6 +9,7 @@
     'columns' => null,
     'color' => null,
     'wrapperClass' => null,
+    'autofocus' => false,
 ])
 
 @php
@@ -61,6 +62,8 @@
         recentLimit: @js($recentLimit),
         recentStorageKey: @js($resolvedRecentStorageKey),
         selectedEvent: @js($selectedEvent),
+        deferRender: @js((bool) $trigger),
+        autofocus: @js((bool) $autofocus),
     })"
     x-on:keydown.escape.stop="open = false"
     style="{{ $colorStyle }}"
@@ -136,91 +139,96 @@
         aria-label="Emoji picker"
         dusk="{{ $dusk }}"
     >
-        <nav class="flex shrink-0 items-center justify-between gap-1 border-b border-zinc-100 px-4 pt-3 dark:border-zinc-800" aria-label="Emoji categories">
-            <template x-for="item in navigationItems()" :key="item.key">
-                <button
-                    type="button"
-                    class="relative inline-flex h-10 min-w-10 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-                    x-bind:class="{ 'text-zinc-950 dark:text-white': activeCategory === item.key }"
-                    x-on:click="scrollToSection(item.key)"
-                    x-bind:aria-label="item.label"
-                >
-                    <span class="inline-flex size-7 items-center justify-center" x-html="categoryIconSvg(item.key)"></span>
-                    <span
-                        class="absolute inset-x-2 bottom-0 h-1 rounded-full"
-                        style="background-color: var(--corepine-emoji-accent);"
-                        x-show="activeCategory === item.key"
-                    ></span>
-                </button>
-            </template>
-        </nav>
-
-        <div class="shrink-0 p-4 pb-2">
-            <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-transparent px-4 text-zinc-500 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
-                </svg>
-                <input
-                    type="search"
-                    class="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-0 dark:text-white dark:placeholder:text-zinc-500"
-                    x-model.debounce.120ms="search"
-                    placeholder="{{ $placeholder }}"
-                    autocomplete="off"
-                >
-            </label>
-        </div>
-
-        <div
-            class="corepine-emoji-scroll scrollbar-thin min-h-0 flex-1 overflow-y-auto px-4 pb-4"
-            x-ref="scroll"
-            x-on:scroll.throttle.100ms="syncActiveCategory()"
-        >
-            <template x-if="recent.length > 0 && !search">
-                <section class="mb-5" data-corepine-emoji-section="recent">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
+        <template x-if="rendered">
+            <div class="contents">
+                <nav class="flex shrink-0 items-center justify-between gap-1 border-b border-zinc-100 px-4 pt-3 dark:border-zinc-800" aria-label="Emoji categories">
+                    <template x-for="item in navigationItems()" :key="item.key">
                         <button
                             type="button"
-                            class="inline-flex size-6 items-center justify-center rounded-full text-sm font-semibold leading-none text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 focus:bg-zinc-100 focus:outline-none dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 dark:focus:bg-zinc-800"
-                            x-on:click.stop="clearRecent()"
-                            aria-label="Clear recent emoji"
-                            dusk="emoji-clear-recent"
+                            class="relative inline-flex h-10 min-w-10 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                            x-bind:class="{ 'text-zinc-950 dark:text-white': activeCategory === item.key }"
+                            x-on:click="scrollToSection(item.key)"
+                            x-bind:aria-label="item.label"
                         >
-                            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                            </svg>
+                            <span class="inline-flex size-7 items-center justify-center" x-html="categoryIconSvg(item.key)"></span>
+                            <span
+                                class="absolute inset-x-2 bottom-0 h-1 rounded-full"
+                                style="background-color: var(--corepine-emoji-accent);"
+                                x-show="activeCategory === item.key"
+                            ></span>
                         </button>
-                    </div>
-                    <div class="{{ $emojiGridClass }} gap-1">
-                        <template x-for="emoji in recent" :key="`recent-${emoji}`">
-                            <button
-                                type="button"
-                                class="inline-flex aspect-square items-center justify-center rounded-lg text-2xl transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none dark:hover:bg-zinc-800 dark:focus:bg-zinc-800"
-                                x-on:click="select({ emoji, label: emoji, tags: [] })"
-                                x-text="emoji"
-                            ></button>
-                        </template>
-                    </div>
-                </section>
-            </template>
+                    </template>
+                </nav>
 
-            <template x-for="category in visibleCategories()" :key="category.key">
-                <section class="mb-5" x-show="category.emojis.length" x-bind:data-corepine-emoji-section="category.key">
-                    <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400" x-text="category.label"></h3>
-                    <div class="{{ $emojiGridClass }} gap-1">
-                        <template x-for="item in category.emojis" :key="`${category.key}-${item.emoji}-${item.label}`">
-                            <button
-                                type="button"
-                                class="inline-flex aspect-square items-center justify-center rounded-lg text-2xl transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none dark:hover:bg-zinc-800 dark:focus:bg-zinc-800"
-                                x-bind:aria-label="item.label"
-                                x-on:click="select(item)"
-                                x-text="item.emoji"
-                            ></button>
-                        </template>
-                    </div>
-                </section>
-            </template>
-        </div>
+                <div class="shrink-0 p-4 pb-2">
+                    <label class="flex h-11 items-center gap-3 rounded-full border-2 bg-transparent px-4 text-zinc-500 dark:text-zinc-400" style="border-color: var(--corepine-emoji-accent);">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
+                        </svg>
+                        <input
+                            x-ref="searchInput"
+                            type="search"
+                            class="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-zinc-900 outline-none placeholder:text-zinc-400 focus:ring-0 dark:text-white dark:placeholder:text-zinc-500"
+                            x-model.debounce.120ms="search"
+                            placeholder="{{ $placeholder }}"
+                            autocomplete="off"
+                        >
+                    </label>
+                </div>
+
+                <div
+                    class="corepine-emoji-scroll scrollbar-thin min-h-0 flex-1 overflow-y-auto px-4 pb-4"
+                    x-ref="scroll"
+                    x-on:scroll.throttle.100ms="syncActiveCategory()"
+                >
+                    <template x-if="recent.length > 0 && !search">
+                        <section class="mb-5" data-corepine-emoji-section="recent">
+                            <div class="mb-3 flex items-center justify-between gap-3">
+                                <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400">{{ $recentLabel }}</h3>
+                                <button
+                                    type="button"
+                                    class="inline-flex size-6 items-center justify-center rounded-full text-sm font-semibold leading-none text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 focus:bg-zinc-100 focus:outline-none dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 dark:focus:bg-zinc-800"
+                                    x-on:click.stop="clearRecent()"
+                                    aria-label="Clear recent emoji"
+                                    dusk="emoji-clear-recent"
+                                >
+                                    <svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="{{ $emojiGridClass }} gap-1">
+                                <template x-for="emoji in recent" :key="`recent-${emoji}`">
+                                    <button
+                                        type="button"
+                                        class="inline-flex aspect-square items-center justify-center rounded-lg text-2xl transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none dark:hover:bg-zinc-800 dark:focus:bg-zinc-800"
+                                        x-on:click="select({ emoji, label: emoji, tags: [] })"
+                                        x-text="emoji"
+                                    ></button>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+
+                    <template x-for="category in visibleCategories()" :key="category.key">
+                        <section class="mb-5" x-show="category.emojis.length" x-bind:data-corepine-emoji-section="category.key">
+                            <h3 class="mb-3 text-sm font-semibold text-zinc-500 dark:text-zinc-400" x-text="category.label"></h3>
+                            <div class="{{ $emojiGridClass }} gap-1">
+                                <template x-for="item in category.emojis" :key="`${category.key}-${item.emoji}-${item.label}`">
+                                    <button
+                                        type="button"
+                                        class="inline-flex aspect-square items-center justify-center rounded-lg text-2xl transition hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none dark:hover:bg-zinc-800 dark:focus:bg-zinc-800"
+                                        x-bind:aria-label="item.label"
+                                        x-on:click="select(item)"
+                                        x-text="item.emoji"
+                                    ></button>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+                </div>
+            </div>
+        </template>
     </section>
 </div>
 
@@ -235,6 +243,8 @@
                 recentLimit: options.recentLimit ?? 24,
                 recentStorageKey: options.recentStorageKey ?? 'corepine.emoji.recent',
                 selectedEvent: options.selectedEvent ?? 'emoji.selected',
+                autofocus: options.autofocus ?? false,
+                rendered: !(options.deferRender ?? false),
                 recent: [],
                 activeCategory: null,
                 categoryIcons: {
@@ -252,11 +262,31 @@
                 init() {
                     this.recent = this.readRecent();
                     this.activeCategory = this.recent.length > 0 ? 'recent' : this.categories[0]?.key ?? null;
-                    this.$nextTick(() => this.syncActiveCategory());
+                    this.$nextTick(() => {
+                        if (this.rendered) {
+                            this.syncActiveCategory();
+
+                            if (this.autofocus) {
+                                this.focusSearch();
+                            }
+                        }
+                    });
                 },
 
                 toggle() {
                     this.open = !this.open;
+
+                    if (this.open) {
+                        this.rendered = true;
+                        this.$nextTick(() => {
+                            this.syncActiveCategory();
+                            this.focusSearch();
+                        });
+                    }
+                },
+
+                focusSearch() {
+                    this.$refs.searchInput?.focus({ preventScroll: true });
                 },
 
                 scrollToSection(key) {
@@ -320,14 +350,53 @@
                     return source
                         .map((category) => ({
                             ...category,
-                            emojis: category.emojis.filter((item) => {
-                                const label = item.label?.toLowerCase() ?? '';
-                                const tags = (item.tags ?? []).join(' ').toLowerCase();
-
-                                return label.includes(query) || tags.includes(query) || item.emoji === query;
-                            }),
+                            emojis: category.emojis
+                                .map((item) => ({ item, score: this.searchScore(item, query) }))
+                                .filter((match) => match.score < Number.POSITIVE_INFINITY)
+                                .sort((a, b) => a.score - b.score)
+                                .map((match) => match.item),
                         }))
                         .filter((category) => category.emojis.length > 0);
+                },
+
+                searchScore(item, query) {
+                    const label = item.label?.toLowerCase() ?? '';
+                    const labelWords = label.split(/[\s:-]+/).filter(Boolean);
+                    const tags = (item.tags ?? []).map((tag) => tag.toLowerCase());
+
+                    if (item.emoji === query) {
+                        return 0;
+                    }
+
+                    if (label === query) {
+                        return 1;
+                    }
+
+                    if (tags.includes(query)) {
+                        return 2;
+                    }
+
+                    if (labelWords.includes(query)) {
+                        return 3;
+                    }
+
+                    if (tags.some((tag) => tag.startsWith(query))) {
+                        return 4;
+                    }
+
+                    if (label.startsWith(query)) {
+                        return 5;
+                    }
+
+                    if (tags.some((tag) => tag.includes(query))) {
+                        return 6;
+                    }
+
+                    if (label.includes(query)) {
+                        return 7;
+                    }
+
+                    return Number.POSITIVE_INFINITY;
                 },
 
                 select(item) {
